@@ -9,9 +9,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public class UploadMinIOService {
-    private MinioClient minioClient;
+    private static MinioClient minioClient;
 
-    public void FileUploaderService(String endpoint, String accessKey, String secretKey)
+    public static void FileUploaderService(String endpoint, String accessKey, String secretKey)
             throws InvalidKeyException, NoSuchAlgorithmException, IOException {
         minioClient = MinioClient.builder()
                 .endpoint(endpoint)
