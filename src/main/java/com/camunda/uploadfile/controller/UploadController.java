@@ -16,7 +16,7 @@ public class UploadController {
 
     @PostMapping(path = "/")
     private void uploadFile(@RequestBody Map<String,Object> body) {
-
+        System.out.println(body);
 
     }
 }
