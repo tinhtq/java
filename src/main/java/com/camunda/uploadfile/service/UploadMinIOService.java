@@ -2,24 +2,32 @@ package com.camunda.uploadfile.service;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import io.minio.UploadObjectArgs;
 import io.minio.errors.MinioException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-public class UploadMinIOService {
-    private static MinioClient minioClient;
+import org.apache.commons.io.FileUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-    public static void FileUploaderService(String endpoint, String accessKey, String secretKey)
+@Service
+public class UploadMinIOService {
+    public  MinioClient minioClient;
+
+    public void FileUploaderService(String endpoint, String accessKey, String secretKey)
             throws InvalidKeyException, NoSuchAlgorithmException, IOException {
+        
         minioClient = MinioClient.builder()
                 .endpoint(endpoint)
                 .credentials(accessKey, secretKey)
                 .build();
     }
-
-    public void uploadFile(String bucketName, String objectName, String filePath) throws IOException {
+    
+    public void uploadFile(String bucketName, String objectName, MultipartFile filePath) throws IOException {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
@@ -28,11 +36,11 @@ public class UploadMinIOService {
                 System.out.println("Bucket '" + bucketName + "' already exists.");
             }
 
-            minioClient.uploadObject(
-                    UploadObjectArgs.builder()
+            minioClient.putObject(
+                    PutObjectArgs.builder()
                             .bucket(bucketName)
                             .object(objectName)
-                            .filename(filePath)
+                            .stream(filePath.getInputStream(),  filePath.getSize() , 10*FileUtils.ONE_MB)
                             .build());
             System.out.println("'" + filePath + "' is successfully uploaded as object '" + objectName + "' to bucket '" + bucketName + "'.");
         } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
